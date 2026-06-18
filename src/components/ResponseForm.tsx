@@ -13,6 +13,7 @@ const choiceOptions: Array<{
   label: string;
   description: string;
   icon: typeof Check;
+  className: string;
   selectedClassName: string;
 }> = [
   {
@@ -20,21 +21,24 @@ const choiceOptions: Array<{
     label: '가능',
     description: '갈 수 있어요',
     icon: Check,
-    selectedClassName: 'bg-[var(--app-mint)] text-white',
+    className: 'bg-[var(--app-mint-soft)] text-[var(--app-ink)]',
+    selectedClassName: 'bg-[var(--app-mint)] text-[var(--app-ink)] shadow-[inset_0_0_0_2px_var(--app-ink)]',
   },
   {
     choice: 'MAYBE',
     label: '애매',
     description: '조정이 필요해요',
     icon: Sparkles,
-    selectedClassName: 'bg-[var(--app-amber)] text-white',
+    className: 'bg-[var(--app-amber-soft)] text-[var(--app-ink)]',
+    selectedClassName: 'bg-[var(--app-amber)] text-[var(--app-ink)] shadow-[inset_0_0_0_2px_var(--app-ink)]',
   },
   {
     choice: 'NO',
     label: '어려움',
     description: '이번엔 힘들어요',
     icon: X,
-    selectedClassName: 'bg-[var(--app-danger)] text-white',
+    className: 'bg-[var(--app-coral-soft)] text-[var(--app-ink)]',
+    selectedClassName: 'bg-[var(--app-coral)] text-[var(--app-ink)] shadow-[inset_0_0_0_2px_var(--app-ink)]',
   },
 ];
 
@@ -83,10 +87,10 @@ function ChoiceButton({
       aria-pressed={selected}
       onClick={onSelect}
       className={[
-        'flex min-h-12 flex-1 items-center justify-center gap-1.5 rounded-[14px] border-2 border-[var(--app-line)] px-2 text-sm font-black transition active:scale-[0.99]',
-        selected ? option.selectedClassName : 'bg-[var(--app-surface)] text-[var(--app-ink)]',
+        'flex min-h-12 flex-1 items-center justify-center gap-1.5 rounded-[14px] border-2 border-[var(--app-line)] px-2 text-[13px] font-black leading-none tracking-normal transition active:scale-[0.99]',
+        selected ? option.selectedClassName : option.className,
       ].join(' ')}>
-      <Icon aria-hidden="true" className="h-4 w-4 shrink-0" />
+      <Icon aria-hidden="true" className="h-4 w-4 shrink-0 text-[var(--app-primary-deep)]" />
       <span>{option.label}</span>
     </button>
   );
@@ -314,8 +318,8 @@ export function ResponseForm({ card }: { card: PublicCardView }) {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-[14px] border-2 border-[var(--app-line)] bg-[var(--app-primary)] px-4 text-base font-black text-white transition disabled:opacity-60 active:scale-[0.99]">
-            <Send aria-hidden="true" className="h-4 w-4" />
+            className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-[14px] border-2 border-[var(--app-line)] bg-[var(--app-coral-soft)] px-4 text-base font-black tracking-normal text-[var(--app-ink)] shadow-[inset_0_0_0_2px_rgba(255,255,255,0.35)] transition disabled:opacity-60 active:scale-[0.99]">
+            <Send aria-hidden="true" className="h-4 w-4 text-[var(--app-primary-deep)]" />
             {isSubmitting ? '저장 중' : '응답 완료하기'}
           </button>
         </>

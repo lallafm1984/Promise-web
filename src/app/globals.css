@@ -41,16 +41,21 @@ body {
   background: var(--app-background);
   color: var(--app-ink);
   font-family:
-    Arial,
     "Apple SD Gothic Neo",
     "Noto Sans KR",
+    "Malgun Gothic",
+    "Segoe UI",
     sans-serif;
+  font-synthesis-weight: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 button,
 input,
-textarea {
-  font: inherit;
+textarea,
+select {
+  font-family: inherit;
 }
 
 .app-card-shadow {
