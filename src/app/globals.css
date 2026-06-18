@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+:root {
+  --app-background: #f9e5cc;
+  --app-surface: #fffdf7;
+  --app-surface-soft: #fee8dd;
+  --app-surface-warm: #fbc9ae;
+  --app-paper: #fff6ea;
+  --app-ink: #4b3428;
+  --app-ink-muted: #846a58;
+  --app-ink-soft: #b9987f;
+  --app-line: #aa695b;
+  --app-primary: #ff9969;
+  --app-primary-deep: #e8755b;
+  --app-coral: #f97940;
+  --app-coral-soft: #ffd8c7;
+  --app-mint: #b2d0b5;
+  --app-mint-soft: #e8f3e7;
+  --app-lime: #b9d672;
+  --app-lime-soft: #eef6cf;
+  --app-amber: #ffb76d;
+  --app-amber-soft: #ffe5b9;
+  --app-sky: #adccd1;
+  --app-sky-soft: #e7f4f5;
+  --app-kakao: #fee500;
+  --app-danger: #f0647a;
+  --app-shadow: 4px 6px 0 rgba(170, 105, 91, 0.18);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--app-background);
+}
+
+body {
+  min-height: 100dvh;
+  margin: 0;
+  background: var(--app-background);
+  color: var(--app-ink);
+  font-family:
+    Arial,
+    "Apple SD Gothic Neo",
+    "Noto Sans KR",
+    sans-serif;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+.app-card-shadow {
+  box-shadow: var(--app-shadow);
+}
