@@ -1,12 +1,12 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { CalendarDays, Check, Clock3, MapPin, MessageCircle, Pencil, Send, Sparkles, X } from 'lucide-react';
+import { CalendarDays, Check, Clock3, MapPin, MessageCircle, Pencil, Send, X } from 'lucide-react';
 
 import type { PublicCardView } from '@/lib/publicCardView';
 import type { ResponseChoice } from '@/lib/responseValidation';
 
-type SelectableChoice = Exclude<ResponseChoice, 'UNANSWERED'>;
+type SelectableChoice = Extract<ResponseChoice, 'YES' | 'NO'>;
 
 const choiceOptions: Array<{
   choice: SelectableChoice;
@@ -23,14 +23,6 @@ const choiceOptions: Array<{
     icon: Check,
     className: 'bg-[var(--app-mint-soft)] text-[var(--app-ink)]',
     selectedClassName: 'bg-[var(--app-mint)] text-[var(--app-ink)] shadow-[inset_0_0_0_2px_var(--app-ink)]',
-  },
-  {
-    choice: 'MAYBE',
-    label: '애매',
-    description: '조정이 필요해요',
-    icon: Sparkles,
-    className: 'bg-[var(--app-amber-soft)] text-[var(--app-ink)]',
-    selectedClassName: 'bg-[var(--app-amber)] text-[var(--app-ink)] shadow-[inset_0_0_0_2px_var(--app-ink)]',
   },
   {
     choice: 'NO',
@@ -253,7 +245,7 @@ export function ResponseForm({ card }: { card: PublicCardView }) {
             {card.mode === 'DIRECT' ? (
               <fieldset className="grid gap-2">
                 <legend className="text-xs font-black text-[var(--app-ink-muted)]">응답 선택</legend>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   {choiceOptions.map((option) => (
                     <ChoiceButton
                       key={option.choice}
@@ -276,7 +268,7 @@ export function ResponseForm({ card }: { card: PublicCardView }) {
                         <Clock3 aria-hidden="true" className="h-4 w-4 text-[var(--app-primary-deep)]" />
                         <span>{candidate.label}</span>
                       </div>
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-2 gap-2">
                         {choiceOptions.map((option) => (
                           <ChoiceButton
                             key={option.choice}
