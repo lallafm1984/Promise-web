@@ -23,10 +23,6 @@ interface RespondentIdRow {
   id: string;
 }
 
-interface AppointmentIdRow {
-  id: string;
-}
-
 export function createSupabasePublicResponseGateway(): PublicResponseGateway {
   const client = getSupabaseAdmin();
 
@@ -136,106 +132,5 @@ export function createSupabasePublicResponseGateway(): PublicResponseGateway {
       }
     },
 
-    async confirmDirectAcceptedCard(input) {
-      const { data: updatedCard, error: updateCardError } = await client
-        .from('appointment_cards')
-        .update({
-          status: 'CONFIRMED',
-          selected_candidate_id: input.candidate.id,
-        })
-        .eq('id', input.cardId)
-        .eq('owner_id', input.ownerId)
-        .eq('mode', 'DIRECT')
-        .eq('status', 'PENDING')
-        .select('id')
-        .maybeSingle();
-
-      if (updateCardError) {
-        throw updateCardError;
-      }
-
-      if (!updatedCard) {
-        return false;
-      }
-
-      const appointmentValues = {
-        owner_id: input.ownerId,
-        card_id: input.cardId,
-        candidate_id: input.candidate.id,
-        title: input.title,
-        location: input.location,
-        starts_at: input.candidate.startsAt,
-        ends_at: input.candidate.endsAt,
-        color_key: 'mint',
-      };
-      const { data: existingAppointment, error: existingAppointmentError } = await client
-        .from('appointments')
-        .select('id')
-        .eq('owner_id', input.ownerId)
-        .eq('card_id', input.cardId)
-        .limit(1)
-        .maybeSingle();
-
-      if (existingAppointmentError) {
-        throw existingAppointmentError;
-      }
-
-      const existingAppointmentId = (existingAppointment as AppointmentIdRow | null)?.id;
-
-      if (existingAppointmentId) {
-        const { error: updateAppointmentError } = await client
-          .from('appointments')
-          .update(appointmentValues)
-          .eq('id', existingAppointmentId)
-          .eq('owner_id', input.ownerId);
-
-        if (updateAppointmentError) {
-          throw updateAppointmentError;
-        }
-        return true;
-      }
-
-      const { error: insertAppointmentError } = await client.from('appointments').insert(appointmentValues);
-
-      if (insertAppointmentError) {
-        throw insertAppointmentError;
-      }
-
-      return true;
-    },
-
-    async declineDirectCard(input) {
-      const { data: updatedCard, error: updateCardError } = await client
-        .from('appointment_cards')
-        .update({
-          status: 'DECLINED',
-        })
-        .eq('id', input.cardId)
-        .eq('owner_id', input.ownerId)
-        .eq('mode', 'DIRECT')
-        .eq('status', 'PENDING')
-        .select('id')
-        .maybeSingle();
-
-      if (updateCardError) {
-        throw updateCardError;
-      }
-
-      if (!updatedCard) {
-        return false;
-      }
-
-      const { error: deleteAppointmentError } = await client
-        .from('appointments')
-        .delete()
-        .eq('owner_id', input.ownerId)
-        .eq('card_id', input.cardId);
-
-      if (deleteAppointmentError) {
-        throw deleteAppointmentError;
-      }
-
-      return true;
-    },
   };
 }

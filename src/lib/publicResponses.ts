@@ -41,21 +41,6 @@ export interface PublicResponseGateway {
       choice: ResponseChoice;
     }>,
   ): Promise<void>;
-  confirmDirectAcceptedCard(input: {
-    cardId: string;
-    ownerId: string;
-    title: string;
-    location: string;
-    candidate: {
-      id: string;
-      startsAt: string;
-      endsAt: string;
-    };
-  }): Promise<boolean>;
-  declineDirectCard(input: {
-    cardId: string;
-    ownerId: string;
-  }): Promise<boolean>;
 }
 
 export interface SubmitPublicResponseInput {
@@ -130,39 +115,11 @@ export async function submitPublicResponse({
     })),
   );
 
-  const acceptedDirectCandidate =
-    card.mode === 'DIRECT'
-      ? candidates.find((candidate) => choicesByCandidateId.get(candidate.id) === 'YES')
-      : undefined;
-  const declinedDirectCard =
-    card.mode === 'DIRECT' && candidates.some((candidate) => choicesByCandidateId.get(candidate.id) === 'NO');
-  let cardConfirmed = false;
-  let cardDeclined = false;
-
-  if (acceptedDirectCandidate) {
-    cardConfirmed = await gateway.confirmDirectAcceptedCard({
-      cardId: card.id,
-      ownerId: card.ownerId,
-      title: card.title,
-      location: card.location,
-      candidate: {
-        id: acceptedDirectCandidate.id,
-        startsAt: acceptedDirectCandidate.startsAt,
-        endsAt: acceptedDirectCandidate.endsAt,
-      },
-    });
-  } else if (declinedDirectCard) {
-    cardDeclined = await gateway.declineDirectCard({
-      cardId: card.id,
-      ownerId: card.ownerId,
-    });
-  }
-
   return {
     editToken: responseToken,
     respondentId: respondent.id,
     updatedExistingResponse: false,
-    cardConfirmed,
-    cardDeclined,
+    cardConfirmed: false,
+    cardDeclined: false,
   };
 }
