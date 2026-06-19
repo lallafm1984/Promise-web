@@ -32,9 +32,6 @@ function AlreadyRespondedCard({ card }: { card: PublicCardView }) {
       </div>
       <p className="text-sm font-black text-[var(--app-primary-deep)]">응답 완료</p>
       <h1 className="mt-1 text-[26px] font-black leading-tight text-[var(--app-ink)]">이미 응답 완료되었어요</h1>
-      <p className="mt-3 text-sm font-extrabold leading-5 text-[var(--app-ink-muted)]">
-        이 브라우저에서는 이 카드에 다시 답장할 수 없어요. 변경이 필요하면 카드를 보낸 사람에게 새 링크를 요청해 주세요.
-      </p>
       <div className="mt-4 rounded-[16px] border-2 border-[var(--app-line)] bg-[var(--app-paper)] p-3">
         <p className="text-sm font-black leading-5 text-[var(--app-ink)]">{card.title}</p>
         <p className="mt-1 text-xs font-extrabold text-[var(--app-ink-muted)]">{card.location}</p>
