@@ -137,7 +137,7 @@ export function createSupabasePublicResponseGateway(): PublicResponseGateway {
     },
 
     async confirmDirectAcceptedCard(input) {
-      const { error: updateCardError } = await client
+      const { data: updatedCard, error: updateCardError } = await client
         .from('appointment_cards')
         .update({
           status: 'CONFIRMED',
@@ -146,11 +146,16 @@ export function createSupabasePublicResponseGateway(): PublicResponseGateway {
         .eq('id', input.cardId)
         .eq('owner_id', input.ownerId)
         .eq('mode', 'DIRECT')
+        .eq('status', 'PENDING')
         .select('id')
-        .single();
+        .maybeSingle();
 
       if (updateCardError) {
         throw updateCardError;
+      }
+
+      if (!updatedCard) {
+        return false;
       }
 
       const appointmentValues = {
@@ -187,7 +192,7 @@ export function createSupabasePublicResponseGateway(): PublicResponseGateway {
         if (updateAppointmentError) {
           throw updateAppointmentError;
         }
-        return;
+        return true;
       }
 
       const { error: insertAppointmentError } = await client.from('appointments').insert(appointmentValues);
@@ -195,10 +200,12 @@ export function createSupabasePublicResponseGateway(): PublicResponseGateway {
       if (insertAppointmentError) {
         throw insertAppointmentError;
       }
+
+      return true;
     },
 
     async declineDirectCard(input) {
-      const { error: updateCardError } = await client
+      const { data: updatedCard, error: updateCardError } = await client
         .from('appointment_cards')
         .update({
           status: 'DECLINED',
@@ -206,11 +213,16 @@ export function createSupabasePublicResponseGateway(): PublicResponseGateway {
         .eq('id', input.cardId)
         .eq('owner_id', input.ownerId)
         .eq('mode', 'DIRECT')
+        .eq('status', 'PENDING')
         .select('id')
-        .single();
+        .maybeSingle();
 
       if (updateCardError) {
         throw updateCardError;
+      }
+
+      if (!updatedCard) {
+        return false;
       }
 
       const { error: deleteAppointmentError } = await client
@@ -222,6 +234,8 @@ export function createSupabasePublicResponseGateway(): PublicResponseGateway {
       if (deleteAppointmentError) {
         throw deleteAppointmentError;
       }
+
+      return true;
     },
   };
 }

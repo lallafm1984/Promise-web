@@ -30,8 +30,12 @@ const gateway: PublicResponseGateway = {
   },
   async updateRespondent() {},
   async upsertCandidateResponses() {},
-  async confirmDirectAcceptedCard() {},
-  async declineDirectCard() {},
+  async confirmDirectAcceptedCard() {
+    return true;
+  },
+  async declineDirectCard() {
+    return true;
+  },
 };
 
 describe('buildPublicResponseResult', () => {

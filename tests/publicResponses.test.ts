@@ -47,9 +47,11 @@ function createGateway(overrides: Partial<PublicResponseGateway> = {}) {
     },
     async confirmDirectAcceptedCard() {
       calls.push('confirmDirectAcceptedCard');
+      return true;
     },
     async declineDirectCard() {
       calls.push('declineDirectCard');
+      return true;
     },
     ...overrides,
   };
@@ -158,6 +160,7 @@ describe('submitPublicResponse', () => {
       },
       async confirmDirectAcceptedCard(input) {
         confirmations.push(input);
+        return true;
       },
     });
 
@@ -187,6 +190,45 @@ describe('submitPublicResponse', () => {
     ]);
   });
 
+  it('does not report a direct card as confirmed when the status update was not applied', async () => {
+    const { gateway } = createGateway({
+      async getCardByToken() {
+        return {
+          id: 'card-direct',
+          mode: 'DIRECT',
+          status: 'PENDING',
+          ownerId: 'owner-1',
+          title: '6??19?쇱뿉 ?깆닔 移댄럹?먯꽌 蹂쇰옒?',
+          location: '?깆닔 移댄럹',
+          candidates: [
+            {
+              id: 'candidate-direct',
+              sortOrder: 0,
+              startsAt: '2026-06-19T10:00:00.000Z',
+              endsAt: '2026-06-19T11:00:00.000Z',
+            },
+          ],
+        };
+      },
+      async confirmDirectAcceptedCard() {
+        return false;
+      },
+    });
+
+    const result = await submitPublicResponse({
+      gateway,
+      token: 'direct-token',
+      input: {
+        displayName: '誘쇱?',
+        responses: [{ candidateId: 'candidate-direct', choice: 'YES' }],
+      },
+      createEditToken: () => 'edit-token',
+    });
+
+    expect(result.cardConfirmed).toBe(false);
+    expect(result.cardDeclined).toBe(false);
+  });
+
   it('does not schedule a direct card when the response is maybe or no', async () => {
     const confirmations: unknown[] = [];
     const { gateway } = createGateway({
@@ -210,6 +252,7 @@ describe('submitPublicResponse', () => {
       },
       async confirmDirectAcceptedCard(input) {
         confirmations.push(input);
+        return true;
       },
     });
 
@@ -251,9 +294,11 @@ describe('submitPublicResponse', () => {
       },
       async confirmDirectAcceptedCard(input) {
         confirmations.push(input);
+        return true;
       },
       async declineDirectCard(input) {
         declines.push(input);
+        return true;
       },
     });
 
@@ -273,11 +318,51 @@ describe('submitPublicResponse', () => {
     expect(declines).toEqual([{ cardId: 'card-direct', ownerId: 'owner-1' }]);
   });
 
+  it('does not report a direct card as declined when the status update was not applied', async () => {
+    const { gateway } = createGateway({
+      async getCardByToken() {
+        return {
+          id: 'card-direct',
+          mode: 'DIRECT',
+          status: 'PENDING',
+          ownerId: 'owner-1',
+          title: '6??19?쇱뿉 ?깆닔 移댄럹?먯꽌 蹂쇰옒?',
+          location: '?깆닔 移댄럹',
+          candidates: [
+            {
+              id: 'candidate-direct',
+              sortOrder: 0,
+              startsAt: '2026-06-19T10:00:00.000Z',
+              endsAt: '2026-06-19T11:00:00.000Z',
+            },
+          ],
+        };
+      },
+      async declineDirectCard() {
+        return false;
+      },
+    });
+
+    const result = await submitPublicResponse({
+      gateway,
+      token: 'direct-token',
+      input: {
+        displayName: '誘쇱?',
+        responses: [{ candidateId: 'candidate-direct', choice: 'NO' }],
+      },
+      createEditToken: () => 'edit-token',
+    });
+
+    expect(result.cardConfirmed).toBe(false);
+    expect(result.cardDeclined).toBe(false);
+  });
+
   it('does not auto-confirm poll cards even when a candidate receives yes', async () => {
     const confirmations: unknown[] = [];
     const { gateway } = createGateway({
       async confirmDirectAcceptedCard(input) {
         confirmations.push(input);
+        return true;
       },
     });
 

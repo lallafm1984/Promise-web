@@ -49,11 +49,11 @@ export interface PublicResponseGateway {
       startsAt: string;
       endsAt: string;
     };
-  }): Promise<void>;
+  }): Promise<boolean>;
   declineDirectCard(input: {
     cardId: string;
     ownerId: string;
-  }): Promise<void>;
+  }): Promise<boolean>;
 }
 
 export interface SubmitPublicResponseInput {
@@ -123,9 +123,11 @@ export async function submitPublicResponse({
       : undefined;
   const declinedDirectCard =
     card.mode === 'DIRECT' && candidates.some((candidate) => choicesByCandidateId.get(candidate.id) === 'NO');
+  let cardConfirmed = false;
+  let cardDeclined = false;
 
   if (acceptedDirectCandidate) {
-    await gateway.confirmDirectAcceptedCard({
+    cardConfirmed = await gateway.confirmDirectAcceptedCard({
       cardId: card.id,
       ownerId: card.ownerId,
       title: card.title,
@@ -137,7 +139,7 @@ export async function submitPublicResponse({
       },
     });
   } else if (declinedDirectCard) {
-    await gateway.declineDirectCard({
+    cardDeclined = await gateway.declineDirectCard({
       cardId: card.id,
       ownerId: card.ownerId,
     });
@@ -147,7 +149,7 @@ export async function submitPublicResponse({
     editToken: responseToken,
     respondentId: respondent.id,
     updatedExistingResponse: Boolean(existingRespondent),
-    cardConfirmed: Boolean(acceptedDirectCandidate),
-    cardDeclined: declinedDirectCard,
+    cardConfirmed,
+    cardDeclined,
   };
 }
