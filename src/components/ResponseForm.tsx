@@ -52,7 +52,7 @@ function getStatusLabel(card: PublicCardView) {
   }
 
   if (card.status === 'DECLINED') {
-    return '마감됨';
+    return '응답 거절';
   }
 
   return '준비 중';
@@ -97,6 +97,7 @@ export function ResponseForm({ card }: { card: PublicCardView }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [cardConfirmed, setCardConfirmed] = useState(false);
+  const [cardDeclined, setCardDeclined] = useState(false);
 
   const selectedCount = useMemo(
     () => (card.mode === 'DIRECT' ? (directChoice ? 1 : 0) : Object.keys(pollChoices).length),
@@ -136,13 +137,19 @@ export function ResponseForm({ card }: { card: PublicCardView }) {
           responses,
         }),
       });
-      const payload = (await response.json()) as { ok: boolean; message?: string; cardConfirmed?: boolean };
+      const payload = (await response.json()) as {
+        ok: boolean;
+        message?: string;
+        cardConfirmed?: boolean;
+        cardDeclined?: boolean;
+      };
 
       if (!response.ok || !payload.ok) {
         throw new Error(payload.message ?? '응답을 저장하지 못했어요.');
       }
 
       setCardConfirmed(Boolean(payload.cardConfirmed));
+      setCardDeclined(Boolean(payload.cardDeclined));
       setSubmitted(true);
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : '응답을 저장하지 못했어요.');
@@ -157,17 +164,21 @@ export function ResponseForm({ card }: { card: PublicCardView }) {
         <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full border-2 border-[var(--app-line)] bg-[var(--app-mint)] text-white">
           <Check aria-hidden="true" className="h-7 w-7" />
         </div>
-        <p className="text-sm font-black text-[var(--app-primary-deep)]">{cardConfirmed ? '약속 확정' : '응답 완료'}</p>
+        <p className="text-sm font-black text-[var(--app-primary-deep)]">
+          {cardConfirmed ? '약속 확정' : cardDeclined ? '응답 거절' : '응답 완료'}
+        </p>
         <h2 className="mt-1 text-[26px] font-black leading-tight text-[var(--app-ink)]">
-          {cardConfirmed ? '약속이 확정됐어요' : '카드에 답장을 남겼어요'}
+          {cardConfirmed ? '약속이 확정됐어요' : cardDeclined ? '어려움으로 답했어요' : '카드에 답장을 남겼어요'}
         </h2>
         <p className="mt-3 text-sm font-extrabold leading-5 text-[var(--app-ink-muted)]">
           {cardConfirmed
             ? '카드 생성자의 앱 일정에 바로 등록됐어요.'
+            : cardDeclined
+              ? '카드 생성자에게 어려움 응답이 전달됐어요.'
             : '같은 브라우저에서 다시 열면 응답을 수정할 수 있어요.'}
         </p>
         <div className="mt-5 grid gap-2">
-          {!cardConfirmed ? (
+          {!cardConfirmed && !cardDeclined ? (
             <button
               type="button"
               onClick={() => setSubmitted(false)}

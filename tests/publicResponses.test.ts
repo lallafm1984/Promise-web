@@ -48,6 +48,9 @@ function createGateway(overrides: Partial<PublicResponseGateway> = {}) {
     async confirmDirectAcceptedCard() {
       calls.push('confirmDirectAcceptedCard');
     },
+    async declineDirectCard() {
+      calls.push('declineDirectCard');
+    },
     ...overrides,
   };
 
@@ -78,6 +81,7 @@ describe('submitPublicResponse', () => {
       respondentId: 'respondent-new',
       updatedExistingResponse: false,
       cardConfirmed: false,
+      cardDeclined: false,
     });
     expect(calls).toEqual(['getCardByToken', 'createRespondent']);
     expect(upserts).toEqual([
@@ -119,6 +123,7 @@ describe('submitPublicResponse', () => {
       respondentId: 'respondent-existing',
       updatedExistingResponse: true,
       cardConfirmed: false,
+      cardDeclined: false,
     });
     expect(calls).toEqual(['getCardByToken', 'upsertCandidateResponses']);
     expect(updated).toEqual([
@@ -220,6 +225,52 @@ describe('submitPublicResponse', () => {
 
     expect(result.cardConfirmed).toBe(false);
     expect(confirmations).toEqual([]);
+  });
+
+  it('declines a direct card when the public response is no', async () => {
+    const declines: unknown[] = [];
+    const confirmations: unknown[] = [];
+    const { gateway } = createGateway({
+      async getCardByToken() {
+        return {
+          id: 'card-direct',
+          mode: 'DIRECT',
+          status: 'PENDING',
+          ownerId: 'owner-1',
+          title: '6월 19일에 성수 카페에서 볼래?',
+          location: '성수 카페',
+          candidates: [
+            {
+              id: 'candidate-direct',
+              sortOrder: 0,
+              startsAt: '2026-06-19T10:00:00.000Z',
+              endsAt: '2026-06-19T11:00:00.000Z',
+            },
+          ],
+        };
+      },
+      async confirmDirectAcceptedCard(input) {
+        confirmations.push(input);
+      },
+      async declineDirectCard(input) {
+        declines.push(input);
+      },
+    });
+
+    const result = await submitPublicResponse({
+      gateway,
+      token: 'direct-token',
+      input: {
+        displayName: '민지',
+        responses: [{ candidateId: 'candidate-direct', choice: 'NO' }],
+      },
+      createEditToken: () => 'edit-token',
+    });
+
+    expect(result.cardConfirmed).toBe(false);
+    expect(result.cardDeclined).toBe(true);
+    expect(confirmations).toEqual([]);
+    expect(declines).toEqual([{ cardId: 'card-direct', ownerId: 'owner-1' }]);
   });
 
   it('does not auto-confirm poll cards even when a candidate receives yes', async () => {

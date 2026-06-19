@@ -196,5 +196,32 @@ export function createSupabasePublicResponseGateway(): PublicResponseGateway {
         throw insertAppointmentError;
       }
     },
+
+    async declineDirectCard(input) {
+      const { error: updateCardError } = await client
+        .from('appointment_cards')
+        .update({
+          status: 'DECLINED',
+        })
+        .eq('id', input.cardId)
+        .eq('owner_id', input.ownerId)
+        .eq('mode', 'DIRECT')
+        .select('id')
+        .single();
+
+      if (updateCardError) {
+        throw updateCardError;
+      }
+
+      const { error: deleteAppointmentError } = await client
+        .from('appointments')
+        .delete()
+        .eq('owner_id', input.ownerId)
+        .eq('card_id', input.cardId);
+
+      if (deleteAppointmentError) {
+        throw deleteAppointmentError;
+      }
+    },
   };
 }

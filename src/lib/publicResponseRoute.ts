@@ -17,6 +17,7 @@ export type PublicResponseResult =
         respondentId: string;
         updatedExistingResponse: boolean;
         cardConfirmed: boolean;
+        cardDeclined: boolean;
       };
       editToken: string;
     }
@@ -60,6 +61,7 @@ export async function buildPublicResponseResult({
         respondentId: response.respondentId,
         updatedExistingResponse: response.updatedExistingResponse,
         cardConfirmed: response.cardConfirmed,
+        cardDeclined: response.cardDeclined,
       },
       editToken: response.editToken,
     };

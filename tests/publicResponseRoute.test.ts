@@ -31,6 +31,7 @@ const gateway: PublicResponseGateway = {
   async updateRespondent() {},
   async upsertCandidateResponses() {},
   async confirmDirectAcceptedCard() {},
+  async declineDirectCard() {},
 };
 
 describe('buildPublicResponseResult', () => {
@@ -52,6 +53,7 @@ describe('buildPublicResponseResult', () => {
         respondentId: 'respondent-1',
         updatedExistingResponse: false,
         cardConfirmed: true,
+        cardDeclined: false,
       },
       editToken: 'edit-token',
     });
