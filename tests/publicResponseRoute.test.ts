@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { buildPublicResponseResult } from '@/lib/publicResponseRoute';
+import { ALREADY_RESPONDED_MESSAGE } from '@/lib/publicResponses';
 import type { PublicResponseGateway } from '@/lib/publicResponses';
 
 const gateway: PublicResponseGateway = {
@@ -84,6 +85,32 @@ describe('buildPublicResponseResult', () => {
       body: {
         ok: false,
         message: '카드를 찾을 수 없어요.',
+      },
+    });
+  });
+
+  it('maps repeat submissions from the same browser to 409 responses', async () => {
+    const result = await buildPublicResponseResult({
+      gateway: {
+        ...gateway,
+        async findRespondentByTokenHash() {
+          return { id: 'respondent-existing' };
+        },
+      },
+      token: 'public-token',
+      editToken: 'existing-edit-token',
+      input: {
+        displayName: '민지',
+        responses: [{ candidateId: 'candidate-a', choice: 'YES' }],
+      },
+      createEditToken: () => 'edit-token',
+    });
+
+    expect(result).toEqual({
+      status: 409,
+      body: {
+        ok: false,
+        message: ALREADY_RESPONDED_MESSAGE,
       },
     });
   });

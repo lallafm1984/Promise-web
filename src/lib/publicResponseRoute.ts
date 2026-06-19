@@ -1,4 +1,4 @@
-import { submitPublicResponse, type PublicResponseGateway } from '@/lib/publicResponses';
+import { ALREADY_RESPONDED_MESSAGE, submitPublicResponse, type PublicResponseGateway } from '@/lib/publicResponses';
 import type { ResponseInput } from '@/lib/responseValidation';
 
 interface BuildPublicResponseResultInput {
@@ -22,7 +22,7 @@ export type PublicResponseResult =
       editToken: string;
     }
   | {
-      status: 400 | 404 | 500;
+      status: 400 | 404 | 409 | 500;
       body: {
         ok: false;
         message: string;
@@ -39,6 +39,7 @@ const USER_SAFE_ERROR_MESSAGES = new Set([
   '이미 마감된 카드예요.',
   '응답할 후보 시간이 없는 카드예요.',
 ]);
+USER_SAFE_ERROR_MESSAGES.add(ALREADY_RESPONDED_MESSAGE);
 
 function toErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : GENERIC_RESPONSE_ERROR_MESSAGE;
@@ -68,10 +69,11 @@ export async function buildPublicResponseResult({
   } catch (error) {
     const message = toErrorMessage(error);
     const isMissingCard = message === MISSING_CARD_MESSAGE;
+    const isAlreadyResponded = message === ALREADY_RESPONDED_MESSAGE;
     const isUserSafe = USER_SAFE_ERROR_MESSAGES.has(message);
 
     return {
-      status: isMissingCard ? 404 : isUserSafe ? 400 : 500,
+      status: isMissingCard ? 404 : isAlreadyResponded ? 409 : isUserSafe ? 400 : 500,
       body: {
         ok: false,
         message: isUserSafe ? message : GENERIC_RESPONSE_ERROR_MESSAGE,

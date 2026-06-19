@@ -7,6 +7,8 @@ import {
   type ResponseInput,
 } from '@/lib/responseValidation';
 
+export const ALREADY_RESPONDED_MESSAGE = '이미 응답 완료된 카드예요.';
+
 export interface PublicCardForResponse {
   id: string;
   mode: 'DIRECT' | 'POLL';
@@ -64,6 +66,22 @@ export interface SubmitPublicResponseInput {
   createEditToken: () => string;
 }
 
+export async function hasSubmittedPublicResponseForCard({
+  gateway,
+  cardId,
+  editToken,
+}: {
+  gateway: PublicResponseGateway;
+  cardId: string;
+  editToken?: string;
+}) {
+  if (!editToken) {
+    return false;
+  }
+
+  return Boolean(await gateway.findRespondentByTokenHash(cardId, hashResponseToken(editToken)));
+}
+
 export async function submitPublicResponse({
   gateway,
   token,
@@ -78,35 +96,30 @@ export async function submitPublicResponse({
   }
 
   const candidates = [...card.candidates].sort((left, right) => left.sortOrder - right.sortOrder);
+  const existingTokenHash = editToken ? hashResponseToken(editToken) : null;
+  const existingRespondent = existingTokenHash
+    ? await gateway.findRespondentByTokenHash(card.id, existingTokenHash)
+    : null;
+
+  if (existingRespondent) {
+    throw new Error(ALREADY_RESPONDED_MESSAGE);
+  }
+
   validateCardCanReceiveResponses({ status: card.status, candidateCount: candidates.length });
 
   const cleanInput = validateResponseInput(
     input,
     candidates.map((candidate) => candidate.id),
   );
-  const existingTokenHash = editToken ? hashResponseToken(editToken) : null;
-  const existingRespondent = existingTokenHash
-    ? await gateway.findRespondentByTokenHash(card.id, existingTokenHash)
-    : null;
 
-  const responseToken = existingRespondent && editToken ? editToken : createEditToken();
+  const responseToken = createEditToken();
   const responseTokenHash = hashResponseToken(responseToken);
-  const respondent = existingRespondent
-    ? existingRespondent
-    : await gateway.createRespondent({
-        cardId: card.id,
-        displayName: cleanInput.displayName,
-        comment: cleanInput.comment,
-        responseTokenHash,
-      });
-
-  if (existingRespondent) {
-    await gateway.updateRespondent({
-      respondentId: existingRespondent.id,
-      displayName: cleanInput.displayName,
-      comment: cleanInput.comment,
-    });
-  }
+  const respondent = await gateway.createRespondent({
+    cardId: card.id,
+    displayName: cleanInput.displayName,
+    comment: cleanInput.comment,
+    responseTokenHash,
+  });
 
   const choicesByCandidateId = new Map(cleanInput.responses.map((response) => [response.candidateId, response.choice]));
   await gateway.upsertCandidateResponses(
@@ -148,7 +161,7 @@ export async function submitPublicResponse({
   return {
     editToken: responseToken,
     respondentId: respondent.id,
-    updatedExistingResponse: Boolean(existingRespondent),
+    updatedExistingResponse: false,
     cardConfirmed,
     cardDeclined,
   };

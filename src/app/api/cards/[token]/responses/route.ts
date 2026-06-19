@@ -3,16 +3,11 @@ import { randomUUID } from 'node:crypto';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
+import { getResponseCookieName, RESPONSE_COOKIE_MAX_AGE_SECONDS } from '@/lib/publicResponseCookies';
 import { buildPublicResponseResult } from '@/lib/publicResponseRoute';
 import { createSupabasePublicResponseGateway } from '@/lib/supabasePublicResponses';
 
 export const runtime = 'nodejs';
-
-const RESPONSE_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 180;
-
-function getResponseCookieName(token: string) {
-  return `wb_response_${token.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 80)}`;
-}
 
 async function readJson(request: Request) {
   try {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { CalendarDays, Check, Clock3, MapPin, MessageCircle, Pencil, Send, X } from 'lucide-react';
+import { CalendarDays, Check, Clock3, MapPin, MessageCircle, Send, X } from 'lucide-react';
 
 import type { PublicCardView } from '@/lib/publicCardView';
 import type { ResponseChoice } from '@/lib/responseValidation';
@@ -175,18 +175,9 @@ export function ResponseForm({ card }: { card: PublicCardView }) {
             ? '카드 생성자의 앱 일정에 바로 등록됐어요.'
             : cardDeclined
               ? '카드 생성자에게 어려움 응답이 전달됐어요.'
-            : '같은 브라우저에서 다시 열면 응답을 수정할 수 있어요.'}
+            : '응답이 저장됐어요. 다시 열면 완료 안내가 보여요.'}
         </p>
         <div className="mt-5 grid gap-2">
-          {!cardConfirmed && !cardDeclined ? (
-            <button
-              type="button"
-              onClick={() => setSubmitted(false)}
-              className="flex min-h-12 items-center justify-center gap-2 rounded-[14px] border-2 border-[var(--app-line)] bg-[var(--app-surface)] px-4 text-sm font-black text-[var(--app-ink)]">
-              <Pencil aria-hidden="true" className="h-4 w-4 text-[var(--app-primary-deep)]" />
-              응답 수정하기
-            </button>
-          ) : null}
           <a
             href={process.env.NEXT_PUBLIC_APP_CTA_URL ?? 'https://whenbollae.app'}
             className="flex min-h-12 items-center justify-center rounded-[14px] border-2 border-[var(--app-line)] bg-[var(--app-primary)] px-4 text-sm font-black text-white">

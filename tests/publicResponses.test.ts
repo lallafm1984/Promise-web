@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { submitPublicResponse, type PublicResponseGateway } from '@/lib/publicResponses';
+import {
+  ALREADY_RESPONDED_MESSAGE,
+  hasSubmittedPublicResponseForCard,
+  submitPublicResponse,
+  type PublicResponseGateway,
+} from '@/lib/publicResponses';
 import { hashResponseToken } from '@/lib/responseValidation';
 
 function createGateway(overrides: Partial<PublicResponseGateway> = {}) {
@@ -94,7 +99,7 @@ describe('submitPublicResponse', () => {
     ]);
   });
 
-  it('updates the existing respondent when the edit token cookie matches', async () => {
+  it('rejects repeat submissions when the edit token cookie already has a response', async () => {
     const tokenHash = hashResponseToken('existing-edit-token');
     const updated: unknown[] = [];
     const { gateway, calls } = createGateway({
@@ -108,33 +113,53 @@ describe('submitPublicResponse', () => {
       },
     });
 
-    const result = await submitPublicResponse({
-      gateway,
-      token: 'public-token',
-      editToken: 'existing-edit-token',
-      input: {
-        displayName: ' 지훈 ',
-        comment: '조금 늦을 수 있어요',
-        responses: [{ candidateId: 'candidate-b', choice: 'MAYBE' }],
+    await expect(
+      submitPublicResponse({
+        gateway,
+        token: 'public-token',
+        editToken: 'existing-edit-token',
+        input: {
+          displayName: ' 지훈 ',
+          comment: '조금 늦을 수 있어요',
+          responses: [{ candidateId: 'candidate-b', choice: 'YES' }],
+        },
+        createEditToken: () => 'new-token-should-not-be-used',
+      }),
+    ).rejects.toThrow(ALREADY_RESPONDED_MESSAGE);
+
+    expect(calls).toEqual(['getCardByToken']);
+    expect(updated).toEqual([]);
+  });
+
+  it('detects when the current browser already submitted a response for a card', async () => {
+    const tokenHash = hashResponseToken('existing-edit-token');
+    const { gateway } = createGateway({
+      async findRespondentByTokenHash(cardId, responseTokenHash) {
+        expect(cardId).toBe('card-1');
+        expect(responseTokenHash).toBe(tokenHash);
+        return { id: 'respondent-existing' };
       },
-      createEditToken: () => 'new-token-should-not-be-used',
     });
 
-    expect(result).toEqual({
-      editToken: 'existing-edit-token',
-      respondentId: 'respondent-existing',
-      updatedExistingResponse: true,
-      cardConfirmed: false,
-      cardDeclined: false,
-    });
-    expect(calls).toEqual(['getCardByToken', 'upsertCandidateResponses']);
-    expect(updated).toEqual([
-      {
-        respondentId: 'respondent-existing',
-        displayName: '지훈',
-        comment: '조금 늦을 수 있어요',
-      },
-    ]);
+    await expect(
+      hasSubmittedPublicResponseForCard({
+        gateway,
+        cardId: 'card-1',
+        editToken: 'existing-edit-token',
+      }),
+    ).resolves.toBe(true);
+  });
+
+  it('does not treat browsers without an edit token as already submitted', async () => {
+    const { gateway, calls } = createGateway();
+
+    await expect(
+      hasSubmittedPublicResponseForCard({
+        gateway,
+        cardId: 'card-1',
+      }),
+    ).resolves.toBe(false);
+    expect(calls).toEqual([]);
   });
 
   it('confirms a direct card and schedules it when the public response accepts', async () => {
