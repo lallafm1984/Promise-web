@@ -68,9 +68,15 @@ export function validateResponseInput(input: ResponseInput, candidateIds: string
   };
 }
 
-export function validateCardCanReceiveResponses(card: { status: AppointmentStatus; candidateCount: number }) {
+export function validateCardCanReceiveResponses(card: { status: AppointmentStatus; candidateCount: number; expiresAt?: string }) {
   if (card.candidateCount === 0) {
     throw new Error('응답할 후보 시간이 없는 카드예요.');
+  }
+
+  const expiresAt = card.expiresAt ? new Date(card.expiresAt).getTime() : null;
+
+  if (expiresAt !== null && !Number.isNaN(expiresAt) && expiresAt <= Date.now()) {
+    throw new Error(CARD_CLOSED_MESSAGE);
   }
 
   if (card.status !== 'PENDING' && card.status !== 'VOTING') {

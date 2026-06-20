@@ -16,6 +16,7 @@ export interface PublicCardForResponse {
   ownerId: string;
   title: string;
   location: string;
+  expiresAt?: string;
   candidates: Array<{
     id: string;
     sortOrder: number;
@@ -90,7 +91,11 @@ export async function submitPublicResponse({
     throw new Error(ALREADY_RESPONDED_MESSAGE);
   }
 
-  validateCardCanReceiveResponses({ status: card.status, candidateCount: candidates.length });
+  validateCardCanReceiveResponses({
+    status: card.status,
+    candidateCount: candidates.length,
+    expiresAt: card.expiresAt,
+  });
 
   const cleanInput = validateResponseInput(
     input,

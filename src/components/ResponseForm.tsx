@@ -7,6 +7,7 @@ import type { PublicCardView } from '@/lib/publicCardView';
 import type { ResponseChoice } from '@/lib/responseValidation';
 
 type SelectableChoice = Extract<ResponseChoice, 'YES' | 'NO'>;
+const RESPONSE_WINDOW_NOTICE = '카드는 생성 후 3일 동안 응답할 수 있어요.';
 
 const choiceOptions: Array<{
   choice: SelectableChoice;
@@ -59,7 +60,29 @@ function getStatusLabel(card: PublicCardView) {
 }
 
 function canRespond(card: PublicCardView) {
-  return (card.status === 'PENDING' || card.status === 'VOTING') && card.candidates.length > 0;
+  return (card.status === 'PENDING' || card.status === 'VOTING') && card.candidates.length > 0 && !isExpired(card);
+}
+
+function isExpired(card: PublicCardView) {
+  const expiresAt = new Date(card.expiresAt).getTime();
+  return !Number.isNaN(expiresAt) && expiresAt <= Date.now();
+}
+
+function formatExpiresAt(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return RESPONSE_WINDOW_NOTICE;
+  }
+
+  return `${RESPONSE_WINDOW_NOTICE} 마감: ${new Intl.DateTimeFormat('ko-KR', {
+    month: 'numeric',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'Asia/Seoul',
+  }).format(date)}`;
 }
 
 function ChoiceButton({
@@ -221,6 +244,9 @@ export function ResponseForm({ card }: { card: PublicCardView }) {
             <p>{card.message}</p>
           </div>
         ) : null}
+        <p className="mt-3 rounded-[14px] border-2 border-[var(--app-line)] bg-[var(--app-amber-soft)] px-3 py-2 text-xs font-black leading-5 text-[var(--app-ink)]">
+          {formatExpiresAt(card.expiresAt)}
+        </p>
       </div>
 
       {isClosed ? (

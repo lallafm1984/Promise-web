@@ -296,4 +296,40 @@ describe('submitPublicResponse', () => {
       }),
     ).rejects.toThrow('카드를 찾을 수 없어요.');
   });
+
+  it('rejects responses after the public card expires', async () => {
+    const { gateway } = createGateway({
+      async getCardByToken() {
+        return {
+          id: 'card-expired',
+          mode: 'DIRECT',
+          status: 'PENDING',
+          ownerId: 'owner-1',
+          title: 'expired card',
+          location: 'place',
+          expiresAt: '2000-01-01T00:00:00.000Z',
+          candidates: [
+            {
+              id: 'candidate-expired',
+              sortOrder: 0,
+              startsAt: '2026-06-19T10:00:00.000Z',
+              endsAt: '2026-06-19T11:00:00.000Z',
+            },
+          ],
+        };
+      },
+    });
+
+    await expect(
+      submitPublicResponse({
+        gateway,
+        token: 'expired-token',
+        input: {
+          displayName: '민지',
+          responses: [{ candidateId: 'candidate-expired', choice: 'YES' }],
+        },
+        createEditToken: () => 'edit-token',
+      }),
+    ).rejects.toThrow('이미 마감된 카드예요.');
+  });
 });

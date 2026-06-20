@@ -82,6 +82,16 @@ describe('validateCardCanReceiveResponses', () => {
       '응답할 후보 시간이 없는 카드예요.',
     );
   });
+
+  it('blocks cards after the three-day response window expires', () => {
+    expect(() =>
+      validateCardCanReceiveResponses({
+        status: 'PENDING',
+        candidateCount: 1,
+        expiresAt: '2026-06-19T00:00:00.000Z',
+      }),
+    ).toThrow(CARD_CLOSED_MESSAGE);
+  });
 });
 
 describe('hashResponseToken', () => {

@@ -10,6 +10,7 @@ interface AppointmentCardRow {
   status: AppointmentStatus;
   title: string;
   location: string;
+  expires_at: string;
 }
 
 interface AppointmentCandidateRow {
@@ -30,7 +31,7 @@ export function createSupabasePublicResponseGateway(): PublicResponseGateway {
     async getCardByToken(token) {
       const { data: cardData, error: cardError } = await client
         .from('appointment_cards')
-        .select('id, owner_id, mode, status, title, location')
+        .select('id, owner_id, mode, status, title, location, expires_at')
         .eq('public_token', token)
         .maybeSingle();
 
@@ -60,6 +61,7 @@ export function createSupabasePublicResponseGateway(): PublicResponseGateway {
         ownerId: card.owner_id,
         title: card.title,
         location: card.location,
+        expiresAt: card.expires_at,
         candidates: ((candidatesData ?? []) as AppointmentCandidateRow[]).map((candidate) => ({
           id: candidate.id,
           sortOrder: candidate.sort_order,

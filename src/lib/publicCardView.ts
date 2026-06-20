@@ -22,6 +22,7 @@ export interface PublicCardView {
   location: string;
   message: string;
   createdAt: string;
+  expiresAt: string;
   candidates: PublicCandidateView[];
 }
 
@@ -35,6 +36,7 @@ interface AppointmentCardRow {
   message: string;
   public_token: string;
   created_at: string;
+  expires_at: string;
 }
 
 interface AppointmentCandidateRow {
@@ -95,7 +97,7 @@ export async function getPublicCardViewByToken(token: string): Promise<PublicCar
 
   const { data: cardData, error: cardError } = await client
     .from('appointment_cards')
-    .select('id, owner_id, mode, status, title, location, message, public_token, created_at')
+    .select('id, owner_id, mode, status, title, location, message, public_token, created_at, expires_at')
     .eq('public_token', cleanToken)
     .maybeSingle();
 
@@ -145,6 +147,7 @@ export async function getPublicCardViewByToken(token: string): Promise<PublicCar
     location: card.location,
     message: card.message,
     createdAt: card.created_at,
+    expiresAt: card.expires_at,
     candidates,
   };
 }
