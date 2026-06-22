@@ -68,21 +68,21 @@ function isExpired(card: PublicCardView) {
   return !Number.isNaN(expiresAt) && expiresAt <= Date.now();
 }
 
-function formatExpiresAt(value: string) {
+function formatResponseDeadline(value: string) {
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return RESPONSE_WINDOW_NOTICE;
+    return null;
   }
 
-  return `${RESPONSE_WINDOW_NOTICE} 마감: ${new Intl.DateTimeFormat('ko-KR', {
+  return new Intl.DateTimeFormat('ko-KR', {
     month: 'numeric',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
     timeZone: 'Asia/Seoul',
-  }).format(date)}`;
+  }).format(date);
 }
 
 function ChoiceButton({
@@ -127,6 +127,7 @@ export function ResponseForm({ card }: { card: PublicCardView }) {
     [card.mode, directChoice, pollChoices],
   );
   const isClosed = !canRespond(card);
+  const responseDeadline = formatResponseDeadline(card.expiresAt);
 
   async function submitResponse() {
     setError(null);
@@ -244,9 +245,12 @@ export function ResponseForm({ card }: { card: PublicCardView }) {
             <p>{card.message}</p>
           </div>
         ) : null}
-        <p className="mt-3 rounded-[14px] border-2 border-[var(--app-line)] bg-[var(--app-amber-soft)] px-3 py-2 text-xs font-black leading-5 text-[var(--app-ink)]">
-          {formatExpiresAt(card.expiresAt)}
-        </p>
+        <div className="mt-3 rounded-[14px] border-2 border-[var(--app-danger)] bg-[var(--app-danger-soft)] px-3 py-2.5 text-xs font-black leading-5 text-[var(--app-ink)]">
+          <p>{RESPONSE_WINDOW_NOTICE}</p>
+          {responseDeadline ? (
+            <p className="mt-1 text-[13px] text-[var(--app-danger)]">마감: {responseDeadline}</p>
+          ) : null}
+        </div>
       </div>
 
       {isClosed ? (
