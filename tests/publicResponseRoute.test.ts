@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildPublicResponseResult } from '@/lib/publicResponseRoute';
+import { PUBLIC_RESPONSE_RATE_LIMITED_MESSAGE, buildPublicResponseResult } from '@/lib/publicResponseRoute';
 import { ALREADY_RESPONDED_MESSAGE } from '@/lib/publicResponses';
 import type { PublicResponseGateway } from '@/lib/publicResponses';
 
@@ -131,6 +131,36 @@ describe('buildPublicResponseResult', () => {
         ok: false,
         message: '응답을 저장하지 못했어요.',
       },
+    });
+  });
+
+  it('returns 429 without writing a response when the public response rate limit is exhausted', async () => {
+    const result = await buildPublicResponseResult({
+      gateway: {
+        ...gateway,
+        async getCardByToken() {
+          throw new Error('card lookup should not run after rate limiting');
+        },
+      },
+      rateLimit: async () => ({
+        allowed: false,
+        retryAfterSeconds: 300,
+      }),
+      token: 'public-token',
+      input: {
+        displayName: '誘쇱?',
+        responses: [{ candidateId: 'candidate-a', choice: 'YES' }],
+      },
+      createEditToken: () => 'edit-token',
+    });
+
+    expect(result).toEqual({
+      status: 429,
+      body: {
+        ok: false,
+        message: PUBLIC_RESPONSE_RATE_LIMITED_MESSAGE,
+      },
+      retryAfterSeconds: 300,
     });
   });
 });

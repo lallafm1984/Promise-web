@@ -7,6 +7,12 @@ interface BuildPublicResponseResultInput {
   input: ResponseInput;
   editToken?: string;
   createEditToken: () => string;
+  rateLimit?: () => Promise<PublicResponseRateLimitDecision>;
+}
+
+export interface PublicResponseRateLimitDecision {
+  allowed: boolean;
+  retryAfterSeconds?: number;
 }
 
 export type PublicResponseResult =
@@ -22,12 +28,15 @@ export type PublicResponseResult =
       editToken: string;
     }
   | {
-      status: 400 | 404 | 409 | 500;
+      status: 400 | 404 | 409 | 429 | 500;
       body: {
         ok: false;
         message: string;
       };
+      retryAfterSeconds?: number;
     };
+
+export const PUBLIC_RESPONSE_RATE_LIMITED_MESSAGE = '응답이 잠시 많아요. 잠시 후 다시 시도해 주세요.';
 
 const GENERIC_RESPONSE_ERROR_MESSAGE = '응답을 저장하지 못했어요.';
 const MISSING_CARD_MESSAGE = '카드를 찾을 수 없어요.';
@@ -51,8 +60,22 @@ export async function buildPublicResponseResult({
   input,
   editToken,
   createEditToken,
+  rateLimit,
 }: BuildPublicResponseResultInput): Promise<PublicResponseResult> {
   try {
+    const rateLimitDecision = rateLimit ? await rateLimit() : { allowed: true };
+
+    if (!rateLimitDecision.allowed) {
+      return {
+        status: 429,
+        body: {
+          ok: false,
+          message: PUBLIC_RESPONSE_RATE_LIMITED_MESSAGE,
+        },
+        retryAfterSeconds: rateLimitDecision.retryAfterSeconds,
+      };
+    }
+
     const response = await submitPublicResponse({ gateway, token, input, editToken, createEditToken });
 
     return {

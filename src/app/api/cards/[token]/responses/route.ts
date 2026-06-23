@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server';
 
 import { getResponseCookieName, RESPONSE_COOKIE_MAX_AGE_SECONDS } from '@/lib/publicResponseCookies';
 import { buildPublicResponseResult } from '@/lib/publicResponseRoute';
+import { createSupabasePublicResponseRateLimitCheck } from '@/lib/supabasePublicResponseRateLimit';
 import { createSupabasePublicResponseGateway } from '@/lib/supabasePublicResponses';
 
 export const runtime = 'nodejs';
@@ -34,9 +35,17 @@ export async function POST(request: Request, context: { params: Promise<{ token:
     input: body,
     editToken: cookieStore.get(cookieName)?.value,
     createEditToken: () => randomUUID(),
+    rateLimit: createSupabasePublicResponseRateLimitCheck({
+      request,
+      token: cleanToken,
+    }),
   });
 
   const response = NextResponse.json(result.body, { status: result.status });
+
+  if (result.status === 429 && result.retryAfterSeconds) {
+    response.headers.set('Retry-After', String(result.retryAfterSeconds));
+  }
 
   if (result.status === 200) {
     response.cookies.set({
