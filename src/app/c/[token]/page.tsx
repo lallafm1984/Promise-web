@@ -61,7 +61,7 @@ export default async function CardResponsePage({ params }: { params: Promise<{ t
   }
 
   return (
-    <main className="min-h-dvh bg-[var(--app-background)] px-4 py-4 sm:py-8">
+    <main className="flex min-h-dvh items-start justify-center bg-[var(--app-background)] px-5 py-5 md:items-center md:py-10">
       <div className="mx-auto flex w-full max-w-[430px] flex-col gap-4">
         {card ? hasSubmitted ? <AlreadyRespondedCard card={card} /> : <ResponseForm card={card} /> : <InvalidCard />}
       </div>
