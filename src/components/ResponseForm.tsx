@@ -84,11 +84,11 @@ function ChoiceButton({
       aria-pressed={selected}
       onClick={onSelect}
       className={[
-        'flex min-h-12 flex-1 items-center justify-center gap-1.5 rounded-[14px] border-2 border-[var(--app-line)] px-2 text-[13px] font-black leading-none tracking-normal transition active:scale-[0.99]',
+        'flex min-h-12 w-full min-w-0 flex-1 items-center justify-center gap-1.5 rounded-[14px] border-2 border-[var(--app-line)] px-2 text-[13px] font-black leading-none tracking-normal transition active:scale-[0.99]',
         selected ? option.selectedClassName : option.className,
       ].join(' ')}>
       <Icon aria-hidden="true" className="h-4 w-4 shrink-0 text-[var(--app-primary-deep)]" />
-      <span>{option.label}</span>
+      <span className="min-w-0">{option.label}</span>
     </button>
   );
 }
@@ -165,7 +165,7 @@ export function ResponseForm({ card }: { card: PublicCardView }) {
 
   if (submitted) {
     return (
-      <section className="app-card-shadow rounded-[20px] border-2 border-[var(--app-line)] bg-[var(--app-surface)] p-5">
+      <section className="app-card-shadow w-full min-w-0 rounded-[20px] border-2 border-[var(--app-line)] bg-[var(--app-surface)] p-5">
         <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full border-2 border-[var(--app-line)] bg-[var(--app-mint)] text-white">
           <Check aria-hidden="true" className="h-7 w-7" />
         </div>
@@ -182,10 +182,10 @@ export function ResponseForm({ card }: { card: PublicCardView }) {
               ? '카드 생성자에게 어려움 응답이 전달됐어요.'
             : '응답이 저장됐어요. 다시 열면 완료 안내가 보여요.'}
         </p>
-        <div className="mt-5 grid gap-2">
+        <div className="mt-5 grid min-w-0 gap-2">
           <a
             href={process.env.NEXT_PUBLIC_APP_CTA_URL ?? 'https://whenbollae.app'}
-            className="flex min-h-12 items-center justify-center rounded-[14px] border-2 border-[var(--app-line)] bg-[var(--app-primary)] px-4 text-sm font-black text-white">
+            className="flex min-h-12 w-full min-w-0 items-center justify-center rounded-[14px] border-2 border-[var(--app-line)] bg-[var(--app-primary)] px-4 text-sm font-black text-white">
             나도 카드 만들기
           </a>
         </div>
@@ -195,12 +195,12 @@ export function ResponseForm({ card }: { card: PublicCardView }) {
 
   return (
     <form
-      className="app-card-shadow rounded-[20px] border-2 border-[var(--app-line)] bg-[var(--app-surface)] p-4"
+      className="app-card-shadow w-full min-w-0 rounded-[20px] border-2 border-[var(--app-line)] bg-[var(--app-surface)] p-4"
       onSubmit={(event) => {
         event.preventDefault();
         void submitResponse();
       }}>
-      <div className="mb-4 rounded-[18px] border-2 border-[var(--app-line)] bg-[var(--app-coral-soft)] p-4">
+      <div className="mb-4 min-w-0 rounded-[18px] border-2 border-[var(--app-line)] bg-[var(--app-coral-soft)] p-4">
         <div className="mb-3 flex items-center justify-between gap-2">
           <span className="rounded-full border-2 border-[var(--app-line)] bg-[var(--app-lime-soft)] px-3 py-1 text-xs font-black text-[var(--app-primary-deep)]">
             {getModeLabel(card.mode)}
@@ -210,20 +210,20 @@ export function ResponseForm({ card }: { card: PublicCardView }) {
           </span>
         </div>
         <h1 className="text-[25px] font-black leading-[1.18] text-[var(--app-ink)]">{card.title}</h1>
-        <div className="mt-3 grid gap-2">
-          <div className="flex min-h-10 items-center gap-2 rounded-[10px] border-2 border-[var(--app-line)] bg-[var(--app-surface)] px-3 text-sm font-extrabold text-[var(--app-ink)]">
+        <div className="mt-3 grid min-w-0 gap-2">
+          <div className="flex min-h-10 min-w-0 items-center gap-2 rounded-[10px] border-2 border-[var(--app-line)] bg-[var(--app-surface)] px-3 text-sm font-extrabold text-[var(--app-ink)]">
             <CalendarDays aria-hidden="true" className="h-4 w-4 shrink-0 text-[var(--app-primary-deep)]" />
             <span className="min-w-0 flex-1">{card.candidates.map((candidate) => candidate.shortLabel).join(' / ')}</span>
           </div>
-          <div className="flex min-h-10 items-center gap-2 rounded-[10px] border-2 border-[var(--app-line)] bg-[var(--app-surface)] px-3 text-sm font-extrabold text-[var(--app-ink)]">
+          <div className="flex min-h-10 min-w-0 items-center gap-2 rounded-[10px] border-2 border-[var(--app-line)] bg-[var(--app-surface)] px-3 text-sm font-extrabold text-[var(--app-ink)]">
             <MapPin aria-hidden="true" className="h-4 w-4 shrink-0 text-[var(--app-primary-deep)]" />
             <span className="min-w-0 flex-1">{card.location}</span>
           </div>
         </div>
         {card.message ? (
-          <div className="mt-3 flex items-start gap-2 rounded-[14px] border-2 border-[var(--app-line)] bg-[var(--app-paper)] p-3 text-sm font-extrabold leading-5 text-[var(--app-ink)]">
+          <div className="mt-3 flex min-w-0 items-start gap-2 rounded-[14px] border-2 border-[var(--app-line)] bg-[var(--app-paper)] p-3 text-sm font-extrabold leading-5 text-[var(--app-ink)]">
             <MessageCircle aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-[var(--app-primary-deep)]" />
-            <p>{card.message}</p>
+            <p className="min-w-0 break-words">{card.message}</p>
           </div>
         ) : null}
       </div>
@@ -237,22 +237,22 @@ export function ResponseForm({ card }: { card: PublicCardView }) {
         </div>
       ) : (
         <>
-          <div className="grid gap-3">
-            <label className="grid gap-1.5">
+          <div className="grid min-w-0 gap-3">
+            <label className="grid min-w-0 gap-1.5">
               <span className="text-xs font-black text-[var(--app-ink-muted)]">닉네임</span>
               <input
                 value={displayName}
                 maxLength={60}
                 onChange={(event) => setDisplayName(event.target.value)}
                 placeholder="이름이나 별명을 알려주세요"
-                className="min-h-12 rounded-[14px] border-2 border-[var(--app-line)] bg-[var(--app-paper)] px-3 text-base font-black text-[var(--app-ink)] outline-none focus:ring-2 focus:ring-[var(--app-primary)]"
+                className="min-h-12 w-full min-w-0 rounded-[14px] border-2 border-[var(--app-line)] bg-[var(--app-paper)] px-3 text-base font-black text-[var(--app-ink)] outline-none focus:ring-2 focus:ring-[var(--app-primary)]"
               />
             </label>
 
             {card.mode === 'DIRECT' ? (
-              <fieldset className="grid gap-2">
+              <fieldset className="grid min-w-0 gap-2">
                 <legend className="text-xs font-black text-[var(--app-ink-muted)]">응답 선택</legend>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid min-w-0 grid-cols-2 gap-2">
                   {choiceOptions.map((option) => (
                     <ChoiceButton
                       key={option.choice}
@@ -264,18 +264,18 @@ export function ResponseForm({ card }: { card: PublicCardView }) {
                 </div>
               </fieldset>
             ) : (
-              <fieldset className="grid gap-2">
+              <fieldset className="grid min-w-0 gap-2">
                 <legend className="text-xs font-black text-[var(--app-ink-muted)]">가능한 시간 투표</legend>
-                <div className="grid gap-2">
+                <div className="grid min-w-0 gap-2">
                   {card.candidates.map((candidate) => (
                     <div
                       key={candidate.id}
-                      className="rounded-[16px] border-2 border-[var(--app-line)] bg-[var(--app-paper)] p-3">
-                      <div className="mb-2 flex items-center gap-2 text-sm font-black text-[var(--app-ink)]">
+                      className="min-w-0 rounded-[16px] border-2 border-[var(--app-line)] bg-[var(--app-paper)] p-3">
+                      <div className="mb-2 flex min-w-0 items-center gap-2 text-sm font-black text-[var(--app-ink)]">
                         <Clock3 aria-hidden="true" className="h-4 w-4 text-[var(--app-primary-deep)]" />
-                        <span>{candidate.label}</span>
+                        <span className="min-w-0 flex-1">{candidate.label}</span>
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid min-w-0 grid-cols-2 gap-2">
                         {choiceOptions.map((option) => (
                           <ChoiceButton
                             key={option.choice}
@@ -296,20 +296,20 @@ export function ResponseForm({ card }: { card: PublicCardView }) {
               </fieldset>
             )}
 
-            <label className="grid gap-1.5">
+            <label className="grid min-w-0 gap-1.5">
               <span className="text-xs font-black text-[var(--app-ink-muted)]">한마디</span>
               <textarea
                 value={comment}
                 maxLength={300}
                 onChange={(event) => setComment(event.target.value)}
                 placeholder="기다린다, 조금 늦어도 괜찮아 같은 말을 남겨보세요"
-                className="min-h-24 resize-none rounded-[14px] border-2 border-[var(--app-line)] bg-[var(--app-paper)] px-3 py-3 text-sm font-extrabold leading-5 text-[var(--app-ink)] outline-none focus:ring-2 focus:ring-[var(--app-primary)]"
+                className="min-h-24 w-full min-w-0 resize-none rounded-[14px] border-2 border-[var(--app-line)] bg-[var(--app-paper)] px-3 py-3 text-sm font-extrabold leading-5 text-[var(--app-ink)] outline-none focus:ring-2 focus:ring-[var(--app-primary)]"
               />
             </label>
           </div>
 
           {error ? (
-            <div role="alert" className="mt-4 rounded-[14px] border-2 border-[var(--app-line)] bg-[var(--app-lime-soft)] p-3 text-sm font-black text-[var(--app-ink)]">
+            <div role="alert" className="mt-4 min-w-0 rounded-[14px] border-2 border-[var(--app-line)] bg-[var(--app-lime-soft)] p-3 text-sm font-black text-[var(--app-ink)]">
               {error}
             </div>
           ) : null}
@@ -317,7 +317,7 @@ export function ResponseForm({ card }: { card: PublicCardView }) {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-[14px] border-2 border-[var(--app-line)] bg-[var(--app-coral-soft)] px-4 text-base font-black tracking-normal text-[var(--app-ink)] shadow-[inset_0_0_0_2px_rgba(255,255,255,0.35)] transition disabled:opacity-60 active:scale-[0.99]">
+            className="mt-4 flex min-h-12 w-full min-w-0 items-center justify-center gap-2 rounded-[14px] border-2 border-[var(--app-line)] bg-[var(--app-coral-soft)] px-4 text-base font-black tracking-normal text-[var(--app-ink)] shadow-[inset_0_0_0_2px_rgba(255,255,255,0.35)] transition disabled:opacity-60 active:scale-[0.99]">
             <Send aria-hidden="true" className="h-4 w-4 text-[var(--app-primary-deep)]" />
             {isSubmitting ? '저장 중' : '응답 완료하기'}
           </button>
